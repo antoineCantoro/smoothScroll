@@ -1,3 +1,6 @@
+import normalizeWheel from 'normalize-wheel';
+import { clamp, lerp } from './utils';
+
 export default class Scroller {
 
     constructor() {
@@ -13,19 +16,19 @@ export default class Scroller {
         this.DOM.container = document.querySelector("[data-scroll-container]")
         this.screenSizes.height = window.innerHeight; 
         this.containerHeight = this.DOM.container.getBoundingClientRect().height;
+
+        // this.DOM.container.style.transform = `translateY(-${  }px)`;
+
+        // console.log();
         
         this.setBodyHeight();
         this.addEventListerners();
     }
 
-    lerp (start, end, amt) {
-        return (1 - amt) * start + amt * end;
-    }
-
-    setScrolledValue() {
-        this.currentScroll = this.lerp(this.currentScroll, this.targetScroll, 0.1);
+    update() {
+        this.currentScroll = lerp(this.currentScroll, this.targetScroll, 0.1);
         this.DOM.container.style.transform = `translateY(-${ this.currentScroll }px)`;
-        requestAnimationFrame(this.setScrolledValue.bind(this))
+        requestAnimationFrame(this.update.bind(this))
     }
 
     setBodyHeight() {
@@ -33,17 +36,18 @@ export default class Scroller {
     }
 
     addEventListerners() {
-        document.addEventListener("scroll", () => {
-            this.targetScroll = window.scrollY;
+
+        window.addEventListener("wheel", (event) => {
+            this.targetScroll += normalizeWheel(event).pixelY;
+            this.targetScroll = clamp(this.targetScroll, 0.01, this.containerHeight - this.screenSizes.height)    
         }, {passive: true})
 
         window.addEventListener("resize", () => {
             this.screenSizes.height = window.innerHeight;
             this.containerHeight = this.DOM.container.getBoundingClientRect().height;
             this.setBodyHeight();
-
         }, {passive: true})
 
-        requestAnimationFrame(this.setScrolledValue.bind(this))
+        requestAnimationFrame(this.update.bind(this))
     }
 }
