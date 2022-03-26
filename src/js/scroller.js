@@ -1,3 +1,5 @@
+// example: https://codesandbox.io/s/ercqs?file=/src/index.js:1009-1015
+
 import normalizeWheel from 'normalize-wheel';
 import { clamp, lerp } from './utils';
 
